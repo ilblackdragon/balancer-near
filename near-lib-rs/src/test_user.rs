@@ -1,3 +1,8 @@
+use std::convert::TryFrom;
+
+use near_sdk::json_types::U128;
+use near_sdk::AccountId;
+
 use near_crypto::{InMemorySigner, KeyType, Signer};
 use near_primitives::{
     account::{AccessKey, Account},
@@ -7,18 +12,11 @@ use near_primitives::{
     types::{AccountId, Balance},
 };
 use near_runtime_standalone::{init_runtime_and_signer, RuntimeStandalone};
-use near_sdk::json_types::U128;
 use serde::de::DeserializeOwned;
 use serde_json::json;
-use std::convert::TryFrom;
 
 const DEFAULT_GAS: u64 = 300_000_000_000_000;
 const STORAGE_AMOUNT: u128 = 50_000_000_000_000_000_000_000_000;
-
-lazy_static::lazy_static! {
-    static ref TOKEN_WASM_BYTES: &'static [u8] = include_bytes!("../../test-token/res/test_token.wasm").as_ref();
-    static ref POOL_WASM_BYTES: &'static [u8] = include_bytes!("../res/balancer_pool.wasm").as_ref();
-}
 
 type TxResult = Result<ExecutionOutcome, ExecutionOutcome>;
 
@@ -31,7 +29,7 @@ fn outcome_into_result(outcome: ExecutionOutcome) -> TxResult {
     }
 }
 
-fn to_yocto(value: &str) -> u128 {
+pub fn to_yocto(value: &str) -> u128 {
     let vals: Vec<_> = value.split(".").collect();
     let part1 = vals[0].parse::<u128>().unwrap() * 10u128.pow(24);
     if vals.len() > 1 {
@@ -43,14 +41,18 @@ fn to_yocto(value: &str) -> u128 {
     }
 }
 
-pub struct ExternalUser {
-    runtime: RuntimeStandalone,
+pub struct TestUser<'a> {
+    runtime: &'a RuntimeStandalone,
     pub account_id: AccountId,
     signer: InMemorySigner,
 }
 
-impl ExternalUser {
-    pub fn new(runtime: RuntimeStandalone, account_id: AccountId, signer: InMemorySigner) -> Self {
+impl TestUser {
+    pub fn new(
+        runtime: &'a RuntimeStandalone,
+        account_id: AccountId,
+        signer: InMemorySigner,
+    ) -> Self {
         Self {
             runtime,
             account_id,
@@ -110,7 +112,6 @@ impl ExternalUser {
         args: serde_json::Value,
         deposit: u128,
     ) -> TxResult {
-        println!("{:?}", args.to_string());
         self.submit_transaction(self.transaction(contract_id).function_call(
             method.to_string(),
             args.to_string().as_bytes().to_vec(),
@@ -138,9 +139,19 @@ impl ExternalUser {
         )
         .unwrap()
     }
+
+    pub fn create_user(&mut self, account_id: AccountId, amount: Balance) -> TestUser {
+        self.submit_transaction(
+            self.transaction(account_id)
+                .create_account()
+                .transfer(amount),
+        )
+        .expect();
+        TestUser::new(self.runtime, account_id, self.signer.clone())
+    }
 }
 
-pub fn init_user() -> ExternalUser {
+pub fn init_test_user() -> TestUser {
     let (mut runtime, signer) = init_runtime_and_signer(&"root".into());
-    ExternalUser::new(runtime, "root".into(), signer)
+    TestUser::new(runtime, "root".into(), signer)
 }

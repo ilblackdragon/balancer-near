@@ -61,6 +61,7 @@ dependencies = [
  "lazy_static",
  "log",
  "near-crypto",
+ "near-lib",
  "near-primitives",
  "near-runtime-standalone",
  "near-sdk",
@@ -773,6 +774,13 @@ dependencies = [
  "serde_json",
  "sha2",
  "subtle 2.2.3",
+]
+
+[[package]]
+name = "near-lib"
+version = "0.1.0"
+dependencies = [
+ "near-sdk",
 ]
 
 [[package]]

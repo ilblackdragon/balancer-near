@@ -1,4 +1,4 @@
-use near_sdk::{Balance};
+use near_sdk::Balance;
 
 pub type Weight = u128;
 
