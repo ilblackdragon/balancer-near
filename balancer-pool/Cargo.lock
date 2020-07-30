@@ -57,16 +57,10 @@ checksum = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
 name = "balancer-pool"
 version = "0.1.0"
 dependencies = [
- "env_logger",
  "lazy_static",
- "log",
- "near-crypto",
  "near-lib",
- "near-primitives",
- "near-runtime-standalone",
  "near-sdk",
- "quickcheck",
- "quickcheck_macros",
+ "near-test",
  "serde",
  "serde_json",
  "uint",
@@ -985,6 +979,22 @@ dependencies = [
  "rand",
  "rocksdb",
  "serde",
+]
+
+[[package]]
+name = "near-test"
+version = "0.1.0"
+dependencies = [
+ "env_logger",
+ "log",
+ "near-crypto",
+ "near-primitives",
+ "near-runtime-standalone",
+ "near-sdk",
+ "quickcheck",
+ "quickcheck_macros",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

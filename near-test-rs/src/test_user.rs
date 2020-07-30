@@ -1,19 +1,12 @@
-use std::convert::TryFrom;
-
-use near_sdk::json_types::U128;
 use near_sdk::AccountId;
 
-use near_crypto::{InMemorySigner, KeyType, Signer};
+use near_crypto::{InMemorySigner, Signer};
 use near_primitives::{
-    account::{AccessKey, Account},
-    errors::{RuntimeError, TxExecutionError},
     hash::CryptoHash,
     transaction::{ExecutionOutcome, ExecutionStatus, Transaction},
-    types::{AccountId, Balance},
+    types::{Balance},
 };
 use near_runtime_standalone::{init_runtime_and_signer, RuntimeStandalone};
-use serde::de::DeserializeOwned;
-use serde_json::json;
 
 const DEFAULT_GAS: u64 = 300_000_000_000_000;
 const STORAGE_AMOUNT: u128 = 50_000_000_000_000_000_000_000_000;
@@ -41,34 +34,31 @@ pub fn to_yocto(value: &str) -> u128 {
     }
 }
 
-pub struct TestUser<'a> {
-    runtime: &'a RuntimeStandalone,
-    pub account_id: AccountId,
+pub struct TestRuntime {
+    runtime: RuntimeStandalone,
     signer: InMemorySigner,
 }
 
-impl TestUser {
+impl TestRuntime {
     pub fn new(
-        runtime: &'a RuntimeStandalone,
-        account_id: AccountId,
+        runtime: RuntimeStandalone,
         signer: InMemorySigner,
     ) -> Self {
         Self {
             runtime,
-            account_id,
             signer,
         }
     }
 
-    fn transaction(&self, receiver_id: AccountId) -> Transaction {
+    fn transaction(&self, signer_id: AccountId, receiver_id: AccountId) -> Transaction {
         let nonce = self
             .runtime
-            .view_access_key(&self.account_id, &self.signer.public_key())
+            .view_access_key(&signer_id, &self.signer.public_key())
             .unwrap()
             .nonce
             + 1;
         Transaction::new(
-            self.account_id.clone(),
+            signer_id.clone(),
             self.signer.public_key(),
             receiver_id,
             nonce,
@@ -87,12 +77,13 @@ impl TestUser {
 
     pub fn deploy(
         &mut self,
+        signer_id: AccountId,
         contract_id: AccountId,
         wasm_bytes: &[u8],
         args: serde_json::Value,
     ) -> TxResult {
         self.submit_transaction(
-            self.transaction(contract_id)
+            self.transaction(signer_id, contract_id)
                 .create_account()
                 .transfer(STORAGE_AMOUNT)
                 .deploy_contract(wasm_bytes.to_vec())
@@ -107,12 +98,13 @@ impl TestUser {
 
     pub fn call(
         &mut self,
+        signer_id: AccountId,
         contract_id: AccountId,
         method: &str,
         args: serde_json::Value,
         deposit: u128,
     ) -> TxResult {
-        self.submit_transaction(self.transaction(contract_id).function_call(
+        self.submit_transaction(self.transaction(signer_id, contract_id).function_call(
             method.to_string(),
             args.to_string().as_bytes().to_vec(),
             DEFAULT_GAS,
@@ -140,18 +132,17 @@ impl TestUser {
         .unwrap()
     }
 
-    pub fn create_user(&mut self, account_id: AccountId, amount: Balance) -> TestUser {
+    pub fn create_user(&mut self, signer_id: AccountId, account_id: AccountId, amount: Balance) {
         self.submit_transaction(
-            self.transaction(account_id)
+            self.transaction(signer_id, account_id)
                 .create_account()
                 .transfer(amount),
         )
-        .expect();
-        TestUser::new(self.runtime, account_id, self.signer.clone())
+        .unwrap();
     }
 }
 
-pub fn init_test_user() -> TestUser {
-    let (mut runtime, signer) = init_runtime_and_signer(&"root".into());
-    TestUser::new(runtime, "root".into(), signer)
+pub fn init_test_runtime() -> TestRuntime {
+    let (runtime, signer) = init_runtime_and_signer(&"root".into());
+    TestRuntime::new(runtime, signer)
 }

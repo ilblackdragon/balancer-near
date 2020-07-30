@@ -1,7 +1,7 @@
+use near_sdk::{AccountId, Balance, env, ext_contract, Promise, StorageUsage};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::json_types::U128;
-use near_sdk::{env, ext_contract, AccountId, Balance, Promise, StorageUsage};
 
 /// Price per 1 byte of storage from mainnet genesis config.
 const STORAGE_PRICE_PER_BYTE: Balance = 100000000000000000000;
@@ -282,38 +282,4 @@ pub trait ExtNEP21 {
     fn transfer_from(&mut self, owner_id: AccountId, new_owner_id: AccountId, amount: U128);
 
     fn balance(&self, account_id: AccountId) -> U128;
-}
-
-#[cfg(test)]
-pub mod test {
-    use crate::test_user::{to_yocto, TestUser};
-
-    /// Interface for fungible token contract to test in standalone mode.
-    pub struct TokenContract {
-        pub contract_id: AccountId,
-    }
-
-    impl TokenContract {
-        pub fn new(
-            user: &mut TestUser,
-            wasmBytes: &[u8],
-            contract_id: AccountId,
-            owner_id: &AccountId,
-            total_supply: &str,
-        ) -> Self {
-            let _ = user.deploy(contract_id.clone(), wasmBytes, json!({"owner_id": user.account_id, "total_supply": U128::from(to_yocto(total_supply))})).unwrap();
-            Self { contract_id }
-        }
-
-        pub fn mint(&self, user: &mut ExternalUser, account_id: &AccountId, amount: &str) {
-            let _ = user
-                .call(
-                    self.contract_id.clone(),
-                    "mint",
-                    json!({"account_id": account_id, "amount": U128::from(to_yocto(amount))}),
-                    0,
-                )
-                .unwrap();
-        }
-    }
 }

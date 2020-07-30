@@ -26,11 +26,5 @@ wee_alloc = { version = "0.4.5", default-features = false, features = [] }
 near-lib = { path = "../near-lib-rs" }
 
 [dev-dependencies]
+near-test = { path = "../near-test-rs" }
 lazy_static = "1.4.0"
-quickcheck = "0.9"
-quickcheck_macros = "0.9"
-log = "0.4"
-env_logger = { version = "0.7.1", default-features = false }
-near-crypto = { git = "https://github.com/nearprotocol/nearcore.git" }
-near-primitives = { git = "https://github.com/nearprotocol/nearcore.git" }
-near-runtime-standalone = { git = "https://github.com/nearprotocol/nearcore.git" }
