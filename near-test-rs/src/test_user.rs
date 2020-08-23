@@ -11,7 +11,7 @@ use near_runtime_standalone::{init_runtime_and_signer, RuntimeStandalone};
 const DEFAULT_GAS: u64 = 300_000_000_000_000;
 const STORAGE_AMOUNT: u128 = 50_000_000_000_000_000_000_000_000;
 
-type TxResult = Result<ExecutionOutcome, ExecutionOutcome>;
+pub type TxResult = Result<ExecutionOutcome, ExecutionOutcome>;
 
 fn outcome_into_result(outcome: ExecutionOutcome) -> TxResult {
     match outcome.status {
