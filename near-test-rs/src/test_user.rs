@@ -110,8 +110,8 @@ impl TestRuntime {
     pub fn call_args(&mut self, signer_id: AccountId, contract_id: AccountId, method: &str, args: Vec<u8>, depsit: u128) -> TxResult {
        self.submit_transaction(self.transaction(signer_id, contract_id).function_call(
             method.to_string(),
-            DEFAULT_GAS,
             args,
+            DEFAULT_GAS,
             deposit,
        ))
     }
