@@ -104,7 +104,7 @@ impl TestRuntime {
         args: serde_json::Value,
         deposit: u128,
     ) -> TxResult {
-        self.call(signer_id, contract_id, method, args.to_string().as_bytes().to_vec(), deposit)
+        self.call_args(signer_id, contract_id, method, args.to_string().as_bytes().to_vec(), deposit)
    }
 
     pub fn call_args(&mut self, signer_id: AccountId, contract_id: AccountId, method: &str, args: Vec<u8>, deposit: u128) -> TxResult {
