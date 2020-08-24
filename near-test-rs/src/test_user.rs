@@ -104,12 +104,16 @@ impl TestRuntime {
         args: serde_json::Value,
         deposit: u128,
     ) -> TxResult {
-        self.submit_transaction(self.transaction(signer_id, contract_id).function_call(
+        self.call(signer_id, contract_id, method, args.to_string().as_bytes().to_vec(), deposit)
+   }
+
+    pub fn call_args(&mut self, signer_id: AccountId, contract_id: AccountId, method: &str, args: Vec<u8>, depsit: u128) -> TxResult {
+       self.submit_transaction(self.transaction(signer_id, contract_id).function_call(
             method.to_string(),
-            args.to_string().as_bytes().to_vec(),
             DEFAULT_GAS,
+            args,
             deposit,
-        ))
+       ))
     }
 
     pub fn view(
