@@ -1,12 +1,12 @@
-use near_sdk::AccountId;
-
 use near_crypto::{InMemorySigner, Signer};
 use near_primitives::{
+    account::AccessKey,
     hash::CryptoHash,
     transaction::{ExecutionOutcome, ExecutionStatus, Transaction},
-    types::{Balance},
+    types::Balance,
 };
 use near_runtime_standalone::{init_runtime_and_signer, RuntimeStandalone};
+use near_sdk::AccountId;
 
 const DEFAULT_GAS: u64 = 300_000_000_000_000;
 const STORAGE_AMOUNT: u128 = 50_000_000_000_000_000_000_000_000;
@@ -140,6 +140,7 @@ impl TestRuntime {
         self.submit_transaction(
             self.transaction(signer_id, account_id)
                 .create_account()
+                .add_key(self.signer.public_key(), AccessKey::full_access())
                 .transfer(amount),
         )
         .unwrap();
