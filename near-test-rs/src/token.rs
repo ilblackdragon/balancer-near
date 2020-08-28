@@ -1,8 +1,8 @@
-use near_sdk::AccountId;
+use near_sdk::{AccountId, Balance};
 use near_sdk::json_types::U128;
 use serde_json::json;
 
-use crate::test_user::TestRuntime;
+use crate::test_user::{TestRuntime, TxResult};
 use crate::units::to_yocto;
 
 const STORAGE_PRICE_PER_BYTE: Balance = 100000000000000000000;
@@ -44,11 +44,11 @@ impl TokenContract {
         runtime.call(signer_id.clone(), self.contract_id.clone(), "transfer_from", json!({"owner_id": owner_id, "new_owner_id": new_owner_id, "amount": amount}), 0)
     }
 
-    pub fn inc_allowance(&self, runtime: &mut TestRuntime, escrow_account_id: AccountId, amount: U128) -> TxResult {
+    pub fn inc_allowance(&self, runtime: &mut TestRuntime, signer_id: &AccountId, escrow_account_id: AccountId, amount: U128) -> TxResult {
         runtime.call(signer_id.clone(), self.contract_id.clone(), "inc_allowance", json!({"escrow_account_id": escrow_account_id, "amount": amount}), 1024 * STORAGE_PRICE_PER_BYTE)
     }
 
-    pub fn dec_allowance(&self, runtime: &mut TestRuntime, escrow_account_id: AccountId, amount: U128) -> TxResult {
+    pub fn dec_allowance(&self, runtime: &mut TestRuntime, signer_id: &AccountId, escrow_account_id: AccountId, amount: U128) -> TxResult {
         runtime.call(signer_id.clone(), self.contract_id.clone(), "dec_allowance", json!({"escrow_account_id": escrow_account_id, "amount": amount}), 0)
     }
 
@@ -61,6 +61,6 @@ impl TokenContract {
     }
 
     pub fn get_allowance(&self, runtime: &mut TestRuntime, owner_id: String, escrow_account_id: AccountId) -> String {
-        runtime.view(self.contract_id.clone(), "get_balance", json!({"owner_id": owner, "escrow_account_id": escrow_account_id})).as_str().unwrap().to_string()
+        runtime.view(self.contract_id.clone(), "get_balance", json!({"owner_id": owner_id, "escrow_account_id": escrow_account_id})).as_str().unwrap().to_string()
     }
 }

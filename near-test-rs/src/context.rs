@@ -1,4 +1,4 @@
-use near_sdk::{AccountId, Balance, BlockHeight, MockedBlockchain, PromiseResult, , PublicKey, VMContext};
+use near_sdk::{AccountId, Balance, BlockHeight, MockedBlockchain, PromiseResult, PublicKey, VMContext};
 
 /// Simple VMContext builder that allows to quickly create custom context in tests.
 pub struct VMContextBuilder {
