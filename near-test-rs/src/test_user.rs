@@ -8,6 +8,8 @@ use near_primitives::{
 use near_runtime_standalone::{init_runtime_and_signer, RuntimeStandalone};
 use near_sdk::AccountId;
 
+pub use crate::units::to_yocto;
+
 const DEFAULT_GAS: u64 = 300_000_000_000_000;
 const STORAGE_AMOUNT: u128 = 50_000_000_000_000_000_000_000_000;
 
@@ -19,18 +21,6 @@ fn outcome_into_result(outcome: ExecutionOutcome) -> TxResult {
         ExecutionStatus::Failure(_) => Err(outcome),
         ExecutionStatus::SuccessReceiptId(_) => panic!("Unresolved ExecutionOutcome run runtime.resolve(tx) to resolve the final outcome of tx"),
         ExecutionStatus::Unknown => unreachable!()
-    }
-}
-
-pub fn to_yocto(value: &str) -> u128 {
-    let vals: Vec<_> = value.split(".").collect();
-    let part1 = vals[0].parse::<u128>().unwrap() * 10u128.pow(24);
-    if vals.len() > 1 {
-        let power = vals[1].len() as u32;
-        let part2 = vals[1].parse::<u128>().unwrap() * 10u128.pow(24 - power);
-        part1 + part2
-    } else {
-        part1
     }
 }
 
@@ -50,7 +40,7 @@ impl TestRuntime {
         }
     }
 
-    fn transaction(&self, signer_id: AccountId, receiver_id: AccountId) -> Transaction {
+    pub fn transaction(&self, signer_id: AccountId, receiver_id: AccountId) -> Transaction {
         let nonce = self
             .runtime
             .view_access_key(&signer_id, &self.signer.public_key())
@@ -66,7 +56,7 @@ impl TestRuntime {
         )
     }
 
-    fn submit_transaction(&mut self, transaction: Transaction) -> TxResult {
+    pub fn submit_transaction(&mut self, transaction: Transaction) -> TxResult {
         let res = self
             .runtime
             .resolve_tx(transaction.sign(&self.signer))

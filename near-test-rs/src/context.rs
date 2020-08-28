@@ -1,4 +1,4 @@
-use near_sdk::{AccountId, Balance, BlockHeight, VMContext, PublicKey};
+use near_sdk::{AccountId, Balance, BlockHeight, MockedBlockchain, PromiseResult, , PublicKey, VMContext};
 
 /// Simple VMContext builder that allows to quickly create custom context in tests.
 pub struct VMContextBuilder {
@@ -72,4 +72,21 @@ impl VMContextBuilder {
     pub fn finish(self) -> VMContext {
         self.context
     }
+}
+
+pub fn testing_env_with_promise_results(context: VMContext, promise_result: PromiseResult) {
+    let storage = near_sdk::env::take_blockchain_interface()
+        .unwrap()
+        .as_mut_mocked_blockchain()
+        .unwrap()
+        .take_storage();
+
+    near_sdk::env::set_blockchain_interface(Box::new(MockedBlockchain::new(
+        context,
+        Default::default(),
+        Default::default(),
+        vec![promise_result],
+        storage,
+        Default::default(),
+    )));
 }

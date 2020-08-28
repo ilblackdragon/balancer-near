@@ -281,5 +281,5 @@ pub trait ExtNEP21 {
 
     fn transfer_from(&mut self, owner_id: AccountId, new_owner_id: AccountId, amount: U128);
 
-    fn balance(&self, account_id: AccountId) -> U128;
+    fn get_balance(&self, owner_id: AccountId) -> U128;
 }
